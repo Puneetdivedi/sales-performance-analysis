@@ -72,6 +72,42 @@ def regional_analysis() -> pd.DataFrame:
     return regional
 
 
+def compare_regions(df: pd.DataFrame = None) -> pd.DataFrame:
+    """
+    Compare all regions side by side with key metrics.
+
+    Returns
+    -------
+    pd.DataFrame
+        Comparison DataFrame with rank by revenue.
+    """
+    if df is None:
+        data_path = os.path.join(
+            os.path.dirname(__file__), "..", "data", "raw", "sales_data.csv"
+        )
+        df = load_data(data_path)
+        df = calculate_kpis(df)
+
+    comparison = (
+        df.groupby("region")
+        .agg(
+            revenue=("revenue", "sum"),
+            orders=("orders", "sum"),
+            avg_conversion=("conversion_rate", "mean"),
+            avg_aov=("average_order_value", "mean"),
+            total_profit=("estimated_profit", "sum"),
+        )
+        .reset_index()
+    )
+    comparison["revenue"] = comparison["revenue"].round(2)
+    comparison["total_profit"] = comparison["total_profit"].round(2)
+    comparison["avg_conversion"] = (comparison["avg_conversion"] * 100).round(2)
+    comparison["avg_aov"] = comparison["avg_aov"].round(2)
+    comparison["rank"] = comparison["revenue"].rank(ascending=False).astype(int)
+
+    return comparison.sort_values("rank")
+
+
 if __name__ == "__main__":
     result = regional_analysis()
     print(result.to_string(index=False))

@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 
 def calculate_kpis(df: pd.DataFrame) -> pd.DataFrame:
@@ -33,7 +34,52 @@ def calculate_kpis(df: pd.DataFrame) -> pd.DataFrame:
         df["visitors"] / df["customers"]
     ).round(2)
 
+    # Estimated profit margin (simulated at 35% of revenue)
+    df["estimated_profit"] = (df["revenue"] * 0.35).round(2)
+
     return df
+
+
+def top_products_by_revenue(df: pd.DataFrame, n: int = 5) -> pd.DataFrame:
+    """
+    Return top N products ranked by total revenue.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame with 'product_name' and 'revenue' columns.
+    n : int
+        Number of top products to return.
+
+    Returns
+    -------
+    pd.DataFrame
+        Top N products with total revenue and order count.
+    """
+    return (
+        df.groupby("product_name")
+        .agg(total_revenue=("revenue", "sum"), total_orders=("orders", "sum"))
+        .sort_values("total_revenue", ascending=False)
+        .head(n)
+        .reset_index()
+    )
+
+
+def calculate_growth_rate(series: pd.Series) -> pd.Series:
+    """
+    Calculate period-over-period growth rate as a percentage.
+
+    Parameters
+    ----------
+    series : pd.Series
+        Numeric series to calculate growth for.
+
+    Returns
+    -------
+    pd.Series
+        Growth rate percentage (NaN for the first period).
+    """
+    return (series.pct_change() * 100).round(2)
 
 
 def summarize_kpis(df: pd.DataFrame) -> dict:

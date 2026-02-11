@@ -13,8 +13,8 @@ import plotly.graph_objects as go
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.data_loader import load_data
-from src.kpi_calculator import calculate_kpis, summarize_kpis
+from src.data_loader import load_data, get_date_range
+from src.kpi_calculator import calculate_kpis, summarize_kpis, top_products_by_revenue
 
 # ── Page Configuration ──────────────────────────────────────────────────────
 st.set_page_config(
@@ -107,7 +107,7 @@ st.markdown("---")
 # ── KPI Cards ───────────────────────────────────────────────────────────────
 summary = summarize_kpis(filtered)
 
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     st.metric("💰 Total Revenue", f"${summary['total_revenue']:,.2f}")
 with col2:
@@ -116,6 +116,9 @@ with col3:
     st.metric("📈 Avg Conversion", f"{summary['avg_conversion_rate']:.2f}%")
 with col4:
     st.metric("🛒 Avg Order Value", f"${summary['avg_order_value']:,.2f}")
+with col5:
+    est_profit = filtered["estimated_profit"].sum() if "estimated_profit" in filtered.columns else 0
+    st.metric("💎 Est. Profit", f"${est_profit:,.2f}")
 
 st.markdown("---")
 

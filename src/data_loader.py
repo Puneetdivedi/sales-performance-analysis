@@ -1,5 +1,8 @@
 import pandas as pd
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def load_data(file_path: str) -> pd.DataFrame:
@@ -39,7 +42,31 @@ def load_data(file_path: str) -> pd.DataFrame:
     # Sort by date
     df = df.sort_values("date").reset_index(drop=True)
 
+    # Validate data integrity
+    if df["revenue"].min() < 0:
+        logger.warning("Negative revenue values detected in dataset")
+    if df["orders"].min() < 0:
+        logger.warning("Negative order counts detected in dataset")
+
+    logger.info(f"Loaded {len(df)} records from {file_path}")
     return df
+
+
+def get_date_range(df: pd.DataFrame) -> tuple:
+    """
+    Return the min and max dates from the dataset.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame with a 'date' column.
+
+    Returns
+    -------
+    tuple
+        (min_date, max_date) as datetime objects.
+    """
+    return df["date"].min(), df["date"].max()
 
 
 def load_processed_data(file_path: str) -> pd.DataFrame:
